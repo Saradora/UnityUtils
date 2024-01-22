@@ -208,14 +208,14 @@ public static class SceneInjection
     private static void DoInjectGameObject(GameObject gameObject)
     {
         _constructedComponents.Clear();
-        foreach (var page in ObjectInjectors)
+        foreach ((Type type, List<IInjectable> injectables) in ObjectInjectors)
         {
-            var components = gameObject.GetComponentsInChildren(page.Key, true);
+            var components = gameObject.GetComponentsInChildren(type, true);
 
             foreach (var component in components)
             {
                 if (_constructedComponents.Contains(component)) continue;
-                foreach (var constructor in page.Value)
+                foreach (var constructor in injectables)
                 {
                     if (!constructor.CanBeInjected(component)) continue;
                     constructor.Inject(component);
@@ -229,11 +229,11 @@ public static class SceneInjection
     {
         Type componentType = component.GetType();
 
-        foreach (var page in ObjectInjectors)
+        foreach ((Type type, List<IInjectable> injectables) in ObjectInjectors)
         {
-            if (!page.Key.IsAssignableFrom(componentType)) continue;
+            if (!type.IsAssignableFrom(componentType)) continue;
 
-            foreach (var constructor in page.Value)
+            foreach (var constructor in injectables)
             {
                 if (!constructor.CanBeInjected(component)) continue;
                 constructor.Inject(component);

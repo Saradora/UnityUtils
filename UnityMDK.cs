@@ -7,7 +7,7 @@ namespace UnityMDK;
 public class UnityMDK : MonoBehaviour
 {
     public const string ModGuid = "Saradora.UnityMDK";
-    public const string ModVersion = "0.2.0";
+    public const string ModVersion = "1.0.0";
     public const string ModName = "Unity MDK";
     
     public static UnityMDK Instance { get; private set; }
@@ -39,8 +39,3 @@ public class UnityMDK : MonoBehaviour
         gameObject.AddComponent<SceneConstructor>();
     }
 }
-
-// unreleased
-//
-// Added:
-// - Patched generic Instantiate
