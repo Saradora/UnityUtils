@@ -10,9 +10,6 @@ namespace UnityMDK.Patches;
 [HarmonyPatch(typeof(Object))]
 internal static class UnityEngine_Object_Patching
 {
-    // todo prefix the generic instantiate Object.Instantiate<T>(T original) when externs can be patched
-    // by patching Object.Internal_CloneSingle
-    
     [HarmonyPatch("Instantiate", typeof(Object))]
     [HarmonyPrefix]
     private static void Instantiate_Prefix(ref Object original)
@@ -41,6 +38,7 @@ internal static class UnityEngine_Object_Patching
         InjectInstance(data);
     }
 
+    // might want to patch the extern method instead when extern are patcheable
     internal static void PatchGenericInstantiate()
     {
         var methods = typeof(Object).GetMethods(BindingFlags.Public | BindingFlags.Static);
@@ -55,7 +53,7 @@ internal static class UnityEngine_Object_Patching
             originalMethod = methodInfo;
         }
 
-        originalMethod = originalMethod.MakeGenericMethod(typeof(GameObject));
+        originalMethod = originalMethod!.MakeGenericMethod(typeof(GameObject));
         MethodInfo instantiatePrefix = typeof(PluginInitializer).GetMethod(nameof(GenericInstantiate),
             BindingFlags.Static | BindingFlags.NonPublic);
 
