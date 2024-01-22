@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityMDK", "UnityMDK/UnityMDK.csproj", "{42657E48-E22D-4DEA-B4B9-B9FA6D3D738A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityMDK", "UnityMDK.csproj", "{42657E48-E22D-4DEA-B4B9-B9FA6D3D738A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
