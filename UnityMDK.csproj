@@ -7,6 +7,7 @@
         <LangVersion>10</LangVersion>
         <Version>0.2.0</Version>
         <Authors>Saradora</Authors>
+        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,5 +27,10 @@
         <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       </Reference>
     </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Condition="'$(Configuration)' == 'Release'" Command="&quot;$(ProjectDir)PackagePacker.exe&quot; &quot;y&quot;" />
+        <Exec Condition="'$(Configuration)' == 'Debug'" Command="&quot;$(ProjectDir)PackagePacker.exe&quot; &quot;n&quot;" />
+    </Target>
 
 </Project>

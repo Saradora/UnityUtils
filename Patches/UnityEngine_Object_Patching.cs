@@ -51,11 +51,15 @@ internal static class UnityEngine_Object_Patching
             if (methodInfo.Name != "Instantiate") continue;
             if (methodInfo.GetParameters().Length != 1) continue;
             originalMethod = methodInfo;
+            break;
         }
 
-        originalMethod = originalMethod!.MakeGenericMethod(typeof(GameObject));
-        MethodInfo instantiatePrefix = typeof(PluginInitializer).GetMethod(nameof(GenericInstantiate),
+        originalMethod = originalMethod.MakeGenericMethod(typeof(Object));
+        MethodInfo instantiatePrefix = typeof(UnityEngine_Object_Patching).GetMethod(nameof(GenericInstantiate),
             BindingFlags.Static | BindingFlags.NonPublic);
+
+        Log.Print(originalMethod);
+        Log.Print(instantiatePrefix);
 
         PluginInitializer.HarmonyInstance.Patch(originalMethod, prefix: new HarmonyMethod(instantiatePrefix));
     }
