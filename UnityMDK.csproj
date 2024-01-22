@@ -5,6 +5,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
         <LangVersion>10</LangVersion>
+        <Version>0.2.0</Version>
+        <Authors>Saradora</Authors>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,8 +26,5 @@
         <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       </Reference>
     </ItemGroup>
-
-
-
 
 </Project>
