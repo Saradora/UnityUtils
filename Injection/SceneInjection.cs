@@ -10,7 +10,8 @@ public static class SceneInjection
 {
     private static readonly SortedList<int, List<MethodInfo>> Initializers = new();
     private static readonly Dictionary<EConstructorEvent, List<MethodInfo>> SceneConstructors = new();
-    private static readonly Dictionary<Type, List<IInjectable>> ObjectInjectors = new();
+    private static readonly Dictionary<Type, List<IInjectable>> ObjectPreInjectors = new();
+    private static readonly Dictionary<Type, List<IInjectable>> ObjectPostInjectors = new();
     private static readonly List<GameObject> ConstructedPrefabs = new();
     private static readonly List<int> ConstructedScenes = new();
     
@@ -52,7 +53,8 @@ public static class SceneInjection
         SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
-    public static void AddComponentInjector<TComponent>(ComponentInjector injector) where TComponent : Component
+    // todo add component post injector
+    public static void AddComponentInjector<TComponent>(ComponentInjector injector, bool postAwake = false) where TComponent : Component
     {
         Type type = typeof(TComponent);
         if (type == ComponentType)
@@ -61,11 +63,10 @@ public static class SceneInjection
             return;
         }
         
-        if (!ObjectInjectors.ContainsKey(type)) ObjectInjectors.Add(type, new List<IInjectable>());
-        ObjectInjectors[type].Add(injector);
+        DoAddComponentInjector(type, injector, postAwake);
     }
 
-    public static void AddComponentInjector<TComponent>(ComponentInjector<TComponent> injector) where TComponent : Component
+    public static void AddComponentInjector<TComponent>(ComponentInjector<TComponent> injector, bool postAwake = false) where TComponent : Component
     {
         Type type = typeof(TComponent);
         if (type == ComponentType)
@@ -74,8 +75,21 @@ public static class SceneInjection
             return;
         }
         
-        if (!ObjectInjectors.ContainsKey(type)) ObjectInjectors.Add(type, new List<IInjectable>());
-        ObjectInjectors[type].Add(injector);
+        DoAddComponentInjector(type, injector, postAwake);
+    }
+
+    private static void DoAddComponentInjector(Type type, IInjectable injectable, bool postAwake)
+    {
+        if (postAwake)
+        {
+            if (!ObjectPostInjectors.ContainsKey(type)) ObjectPostInjectors.Add(type, new List<IInjectable>());
+            ObjectPostInjectors[type].Add(injectable);
+        }
+        else
+        {
+            if (!ObjectPreInjectors.ContainsKey(type)) ObjectPreInjectors.Add(type, new List<IInjectable>());
+            ObjectPreInjectors[type].Add(injectable);
+        }
     }
 
     private static void RegisterInjector(Type type)
@@ -85,11 +99,19 @@ public static class SceneInjection
 
         InjectToComponentAttribute injectAttribute = (InjectToComponentAttribute)type.GetCustomAttribute(InjectAttributeType);
         if (injectAttribute.ComponentType is null) return;
-        
-        if (!ObjectInjectors.ContainsKey(injectAttribute.ComponentType)) ObjectInjectors.Add(injectAttribute.ComponentType, new List<IInjectable>());
+
+        if (injectAttribute.PostAwake)
+        {
+            if (!ObjectPostInjectors.ContainsKey(injectAttribute.ComponentType)) ObjectPostInjectors.Add(injectAttribute.ComponentType, new List<IInjectable>());
+            ObjectPostInjectors[injectAttribute.ComponentType].Add(new AddComponentInjector(type));
+        }
+        else
+        {
+            if (!ObjectPreInjectors.ContainsKey(injectAttribute.ComponentType)) ObjectPreInjectors.Add(injectAttribute.ComponentType, new List<IInjectable>());
+            ObjectPreInjectors[injectAttribute.ComponentType].Add(new AddComponentInjector(type));
+        }
 
         Log.Warning($"Constructable: Adding {type} to {injectAttribute.ComponentType}");
-        ObjectInjectors[injectAttribute.ComponentType].Add(new AddComponentInjector(type));
     }
 
     private static void RegisterSceneConstructor(Type type)
@@ -208,7 +230,7 @@ public static class SceneInjection
     private static void DoInjectGameObject(GameObject gameObject)
     {
         _constructedComponents.Clear();
-        foreach ((Type type, List<IInjectable> injectables) in ObjectInjectors)
+        foreach ((Type type, List<IInjectable> injectables) in ObjectPreInjectors)
         {
             var components = gameObject.GetComponentsInChildren(type, true);
 
@@ -229,7 +251,18 @@ public static class SceneInjection
     {
         Type componentType = component.GetType();
 
-        foreach ((Type type, List<IInjectable> injectables) in ObjectInjectors)
+        foreach ((Type type, List<IInjectable> injectables) in ObjectPreInjectors)
+        {
+            if (!type.IsAssignableFrom(componentType)) continue;
+
+            foreach (var constructor in injectables)
+            {
+                if (!constructor.CanBeInjected(component)) continue;
+                constructor.Inject(component);
+            }
+        }
+
+        foreach ((Type type, List<IInjectable> injectables) in ObjectPostInjectors)
         {
             if (!type.IsAssignableFrom(componentType)) continue;
 
