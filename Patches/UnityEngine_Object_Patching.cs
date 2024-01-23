@@ -10,6 +10,7 @@ namespace UnityMDK.Patches;
 [HarmonyPatch(typeof(Object))]
 internal static class UnityEngine_Object_Patching
 {
+    [HarmonyPatch("Instantiate", typeof(Object), typeof(Transform), typeof(bool))]
     [HarmonyPatch("Instantiate", typeof(Object))]
     [HarmonyPrefix]
     private static void Instantiate_Prefix(ref Object original)
@@ -17,23 +18,10 @@ internal static class UnityEngine_Object_Patching
         InjectInstance(original);
     }
     
-    [HarmonyPatch("Instantiate", typeof(Object), typeof(Transform), typeof(bool))]
-    [HarmonyPrefix]
-    private static void InstantiateParent_Prefix(ref Object original)
-    {
-        InjectInstance(original);
-    }
-    
+    [HarmonyPatch("Internal_InstantiateSingleWithParent", typeof(Object), typeof(Transform), typeof(Vector3), typeof(Quaternion))]
     [HarmonyPatch("Internal_InstantiateSingle", typeof(Object), typeof(Vector3), typeof(Quaternion))]
     [HarmonyPrefix]
     private static void Internal_InstantiateSingle_Prefix(ref Object data)
-    {
-        InjectInstance(data);
-    }
-    
-    [HarmonyPatch("Internal_InstantiateSingleWithParent", typeof(Object), typeof(Transform), typeof(Vector3), typeof(Quaternion))]
-    [HarmonyPrefix]
-    private static void Internal_InstantiateSingleWithParent_Prefix(ref Object data)
     {
         InjectInstance(data);
     }
@@ -57,9 +45,6 @@ internal static class UnityEngine_Object_Patching
         originalMethod = originalMethod.MakeGenericMethod(typeof(Object));
         MethodInfo instantiatePrefix = typeof(UnityEngine_Object_Patching).GetMethod(nameof(GenericInstantiate),
             BindingFlags.Static | BindingFlags.NonPublic);
-
-        Log.Print(originalMethod);
-        Log.Print(instantiatePrefix);
 
         PluginInitializer.HarmonyInstance.Patch(originalMethod, prefix: new HarmonyMethod(instantiatePrefix));
     }

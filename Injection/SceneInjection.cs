@@ -85,7 +85,7 @@ public static class SceneInjection
 
         InjectToComponentAttribute injectAttribute = (InjectToComponentAttribute)type.GetCustomAttribute(InjectAttributeType);
         if (injectAttribute.ComponentType is null) return;
-                
+        
         if (!ObjectInjectors.ContainsKey(injectAttribute.ComponentType)) ObjectInjectors.Add(injectAttribute.ComponentType, new List<IInjectable>());
 
         Log.Warning($"Constructable: Adding {type} to {injectAttribute.ComponentType}");
