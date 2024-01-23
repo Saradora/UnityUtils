@@ -25,6 +25,22 @@ internal static class UnityEngine_Object_Patching
     {
         InjectInstance(data);
     }
+    
+    [HarmonyPatch("Instantiate", typeof(Object), typeof(Transform), typeof(bool))]
+    [HarmonyPatch("Instantiate", typeof(Object))]
+    [HarmonyPostfix]
+    private static void Instantiate_Postfix(ref Object __result)
+    {
+        InjectInstancePostFix(__result);
+    }
+    
+    [HarmonyPatch("Internal_InstantiateSingleWithParent", typeof(Object), typeof(Transform), typeof(Vector3), typeof(Quaternion))]
+    [HarmonyPatch("Internal_InstantiateSingle", typeof(Object), typeof(Vector3), typeof(Quaternion))]
+    [HarmonyPostfix]
+    private static void Internal_InstantiateSingle_Postfix(ref Object __result)
+    {
+        InjectInstancePostFix(__result);
+    }
 
     // might want to patch the extern method instead when extern are patcheable
     internal static void PatchGenericInstantiate()
@@ -43,15 +59,23 @@ internal static class UnityEngine_Object_Patching
         }
 
         originalMethod = originalMethod.MakeGenericMethod(typeof(Object));
-        MethodInfo instantiatePrefix = typeof(UnityEngine_Object_Patching).GetMethod(nameof(GenericInstantiate),
+        MethodInfo instantiatePrefix = typeof(UnityEngine_Object_Patching).GetMethod(nameof(GenericInstantiate_Prefix),
             BindingFlags.Static | BindingFlags.NonPublic);
 
-        PluginInitializer.HarmonyInstance.Patch(originalMethod, prefix: new HarmonyMethod(instantiatePrefix));
+        MethodInfo instantiatePostfix = typeof(UnityEngine_Object_Patching).GetMethod(nameof(GenericInstantiate_Postfix),
+                BindingFlags.Static | BindingFlags.NonPublic);
+
+        PluginInitializer.HarmonyInstance.Patch(originalMethod, prefix: new HarmonyMethod(instantiatePrefix), postfix: new HarmonyMethod(instantiatePostfix));
     }
 
-    private static void GenericInstantiate(Object original)
+    private static void GenericInstantiate_Prefix(Object original)
     {
         InjectInstance(original);
+    }
+
+    private static void GenericInstantiate_Postfix(Object __result)
+    {
+        InjectInstancePostFix(__result);
     }
 
     private static void InjectInstance(Object data)
@@ -63,6 +87,19 @@ internal static class UnityEngine_Object_Patching
                 break;
             case Component component:
                 SceneInjection.InjectGameObject(component.gameObject);
+                break;
+        }
+    }
+
+    private static void InjectInstancePostFix(Object data)
+    {
+        switch (data)
+        {
+            case GameObject gameObject:
+                SceneInjection.InjectGameObjectPost(gameObject);
+                break;
+            case Component component:
+                SceneInjection.InjectGameObjectPost(component.gameObject);
                 break;
         }
     }

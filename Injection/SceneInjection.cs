@@ -227,6 +227,26 @@ public static class SceneInjection
     
     private static List<Component> _constructedComponents = new();
 
+    internal static void InjectGameObjectPost(GameObject gameObject)
+    {
+        _constructedComponents.Clear();
+        foreach ((Type type, List<IInjectable> injectables) in ObjectPostInjectors)
+        {
+            var components = gameObject.GetComponentsInChildren(type, true);
+
+            foreach (var component in components)
+            {
+                if (_constructedComponents.Contains(component)) continue;
+                foreach (var constructor in injectables)
+                {
+                    if (!constructor.CanBeInjected(component)) continue;
+                    constructor.Inject(component);
+                }
+                _constructedComponents.Add(component);
+            }
+        }
+    }
+
     private static void DoInjectGameObject(GameObject gameObject)
     {
         _constructedComponents.Clear();

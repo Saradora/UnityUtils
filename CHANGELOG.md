@@ -11,7 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.0.0] - 2024-01-22
 
 ### Added
+- Added Postfix to ``Object.Instantiate()`` methods
 - Patched last missing instantiate method ``Object.Instantiate<T>(T original)``
+- Added utils for creating prefabs
+- Added automatic binding of ConfigDatas
 
 ## [0.1.0] - 2024-01-20
 
