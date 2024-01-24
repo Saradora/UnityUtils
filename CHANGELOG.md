@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 //
-- added reflection invoke with return value
-- made logging generic
+
+## [1.1.0] - 2024-01-24
+
+### Added
+- Added reflection Invoke with return value
+
+### Changed
+- Made logging more generic
 
 ## [1.0.0] - 2024-01-22
 
