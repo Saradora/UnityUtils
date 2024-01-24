@@ -10,19 +10,39 @@ public static class ReflectionUtility
 {
     private static readonly BindingFlags DefaultBindingFlags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         
-    public static object InvokeMethod(this object target, string methodName)
+    public static void InvokeMethod(this object target, string methodName)
     {
         var methodInfo = target.GetType().GetMethod(methodName, DefaultBindingFlags);
 
         if (methodInfo is null)
         {
             Log.Error($"Method {methodName} not found");
-            return null;
         }
         else
         {
-            return methodInfo.Invoke(target, null);
+            methodInfo.Invoke(target, null);
         }
+    }
+
+    public static TReturn InvokeMethod<TReturn>(this object target, string methodName)
+    {
+        var methodInfo = target.GetType().GetMethod(methodName, DefaultBindingFlags);
+
+        if (methodInfo is null)
+        {
+            Log.Error($"Method {methodName} not found");
+            return default;
+        }
+
+        object returnValue = methodInfo.Invoke(target, null);
+        if (returnValue == default) return default;
+
+        if (returnValue is TReturn castValue)
+        {
+            return castValue;
+        }
+
+        throw new ArgumentException($"Method {methodName} isn't of type {typeof(TReturn).Name}");
     }
 
     /// <summary>

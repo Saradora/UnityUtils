@@ -8,3 +8,4 @@ Mostly for my own usage.
 
 - Easy injection of components at runtime
 - Patching prefabs
+- Easy binding of ConfigEntry

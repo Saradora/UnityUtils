@@ -1,29 +1,38 @@
-﻿using System;
+﻿using System.Reflection;
 using BepInEx.Logging;
+using Logger = BepInEx.Logging.Logger;
 
 namespace UnityMDK.Logging;
 
 public static class Log
 {
-    private static readonly ManualLogSource LOGSource = Logger.CreateLogSource(UnityMDK.ModGuid);
+    private static readonly Dictionary<Assembly, ManualLogSource> LOGSources = new();
     
     public static void Print(object message)
     {
-        LOGSource.LogInfo(message ?? "Null");
+        GetLogger(Assembly.GetCallingAssembly()).LogInfo(message ?? "Null");
     }
 
     public static void Warning(object message)
     {
-        LOGSource.LogWarning(message ?? "Null");
+        GetLogger(Assembly.GetCallingAssembly()).LogWarning(message ?? "Null");
     }
 
     public static void Error(object message)
     {
-        LOGSource.LogError(message ?? "Null");
+        GetLogger(Assembly.GetCallingAssembly()).LogError(message ?? "Null");
     }
 
     public static void Exception(Exception exception)
     {
-        LOGSource.LogError(exception?.Message ?? "Null");
+        GetLogger(Assembly.GetCallingAssembly()).LogError(exception?.Message ?? "Null");
+    }
+
+    private static ManualLogSource GetLogger(Assembly assembly)
+    {
+        if (LOGSources.TryGetValue(assembly, out ManualLogSource logger)) return logger;
+        
+        LOGSources[assembly] = Logger.CreateLogSource(assembly.GetName().Name);
+        return LOGSources[assembly];
     }
 }
