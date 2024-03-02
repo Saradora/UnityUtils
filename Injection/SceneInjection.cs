@@ -40,19 +40,25 @@ public static class SceneInjection
 
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
-            foreach (var type in assembly.GetTypes())
+            try
             {
-                try
+                foreach (var type in assembly.GetTypes())
                 {
-                    RegisterInjector(type);
-                    RegisterSceneConstructor(type);
-                    RegisterInitializer(type);
+                    try
+                    {
+                        RegisterInjector(type);
+                        RegisterSceneConstructor(type);
+                        RegisterInitializer(type);
+                    }
+                    catch
+                    {
+                        Log.Error($"Failed analysis of {type.FullName}:");
+                    }
                 }
-                catch (Exception e)
-                {
-                    Log.Error($"Failed analysis of {type.FullName}:");
-                    Log.Exception(e);
-                }
+            }
+            catch
+            {
+                Log.Error($"Failed analysis of {assembly.FullName}:");
             }
         }
         

@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 //
 
+## [1.1.2] - 2024-03-02
+
+### Fixed
+- Fixed another exception when analyzing types that contain unreferences assemblies
+
 ## [1.1.1] - 2024-03-02
 
 ### Fixed
