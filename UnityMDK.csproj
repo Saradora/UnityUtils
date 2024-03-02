@@ -32,6 +32,7 @@
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
         <Exec Condition="'$(Configuration)' == 'Release'" Command="&quot;$(ProjectDir)PackagePacker.exe&quot; &quot;y&quot;" />
+        <Exec Condition="'$(Configuration)' == 'Release'" Command="&quot;$(ProjectDir)PackagePacker.exe&quot; &quot;n&quot;" />
         <Exec Condition="'$(Configuration)' == 'Debug'" Command="&quot;$(ProjectDir)PackagePacker.exe&quot; &quot;n&quot;" />
     </Target>
 

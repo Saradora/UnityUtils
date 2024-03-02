@@ -42,9 +42,17 @@ public static class SceneInjection
         {
             foreach (var type in assembly.GetTypes())
             {
-                RegisterInjector(type);
-                RegisterSceneConstructor(type);
-                RegisterInitializer(type);
+                try
+                {
+                    RegisterInjector(type);
+                    RegisterSceneConstructor(type);
+                    RegisterInitializer(type);
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Failed analysis of {type.FullName}:");
+                    Log.Exception(e);
+                }
             }
         }
         
