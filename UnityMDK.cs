@@ -7,7 +7,7 @@ namespace UnityMDK;
 public class UnityMDK : MonoBehaviour
 {
     public const string ModGuid = "Saradora.UnityMDK";
-    public const string ModVersion = "1.1.2";
+    public const string ModVersion = "1.1.3";
     public const string ModName = "Unity MDK";
     
     public static UnityMDK Instance { get; private set; }

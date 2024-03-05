@@ -8,10 +8,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 //
 
+## [1.1.3] - 2024-03-05
+
+### Changed
+- Tweaked error message of analysis exception
+
 ## [1.1.2] - 2024-03-02
 
 ### Fixed
-- Fixed another exception when analyzing types that contain unreferences assemblies
+- Fixed another exception when analyzing types that contain unreferenced assemblies
 
 ## [1.1.1] - 2024-03-02
 

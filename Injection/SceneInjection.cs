@@ -52,13 +52,16 @@ public static class SceneInjection
                     }
                     catch
                     {
-                        Log.Error($"Failed analysis of {type.FullName}:");
+                        string fullTypeName = type.Assembly.GetName().Name + ".";
+                        if (!string.IsNullOrEmpty(type.Namespace)) fullTypeName += type.Namespace + ".";
+                        fullTypeName += type.Name;
+                        Log.Warning($"Failed analysis of [{fullTypeName}]. If this type doesn't use UnityMDK, this message can be safely ignored.");
                     }
                 }
             }
             catch
             {
-                Log.Error($"Failed analysis of {assembly.FullName}:");
+                Log.Warning($"Failed analysis of [{assembly.GetName().Name}]. If this assembly doesn't use UnityMDK, this message can be safely ignored.");
             }
         }
         
