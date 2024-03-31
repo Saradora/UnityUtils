@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-//
+## [1.2.0] - 2024-03-31
+
+### Added
+- Event when a config is changed
 
 ## [1.1.3] - 2024-03-05
 
