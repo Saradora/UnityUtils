@@ -3,12 +3,12 @@ using UnityMDK.Logging;
 
 namespace UnityMDK.Config;
 
-public abstract class ConfigData
+internal interface IConfigData
 {
-    internal abstract void Bind(ConfigFile cfg, string name, string section, string description);
+    internal void Bind(ConfigFile cfg, string name, string section, string description);
 }
 
-public class ConfigData<T> : ConfigData
+public class ConfigData<T> : IConfigData
 {
     private ConfigEntry<T> _configEntry;
 
@@ -25,7 +25,7 @@ public class ConfigData<T> : ConfigData
         _defaultValue = defaultValue;
     }
 
-    internal override void Bind(ConfigFile cfg, string name, string section, string description)
+    void IConfigData.Bind(ConfigFile cfg, string name, string section, string description)
     {
         if (_configEntry is not null)
         {

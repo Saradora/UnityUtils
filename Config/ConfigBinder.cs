@@ -7,7 +7,7 @@ namespace UnityMDK.Config;
 
 public static class ConfigBinder
 {
-    private static readonly Type ConfigDataType = typeof(ConfigData);
+    private static readonly Type ConfigDataType = typeof(IConfigData);
 
     private static ConfigFile _currentFile;
     
@@ -38,7 +38,7 @@ public static class ConfigBinder
             string description = configDescriptionAttribute?.Description;
 
             string name = memberInfo.Name.Replace("_", "");
-            name = currentSection + Regex.Replace(name, @"\b\p{Ll}", match => match.Value.ToUpper());
+            name = Regex.Replace(name, @"\b\p{Ll}", match => match.Value.ToUpper());
 
             FieldInfo field = memberInfo switch
             {
@@ -65,10 +65,10 @@ public static class ConfigBinder
             return;
         }
         
-        ConfigData value = (ConfigData)fieldInfo.GetValue(null);
+        IConfigData value = (IConfigData)fieldInfo.GetValue(null);
         if (value is null)
         {
-            value = (ConfigData)Activator.CreateInstance(typeof(ConfigData<>).MakeGenericType(genericType));
+            value = (IConfigData)Activator.CreateInstance(typeof(ConfigData<>).MakeGenericType(genericType));
             fieldInfo.SetValue(null, value);
         }
         
