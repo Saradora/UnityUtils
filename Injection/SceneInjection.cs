@@ -109,6 +109,23 @@ public static class SceneInjection
         }
     }
 
+    public static void RemoveComponentInjector<TComponent>(bool postAwake = false) where TComponent : Component
+    {
+        DoRemoveComponentInjector(typeof(TComponent), postAwake);
+    }
+
+    private static void DoRemoveComponentInjector(Type type, bool postAwake)
+    {
+        if (postAwake)
+        {
+            ObjectPostInjectors.Remove(type);
+        }
+        else
+        {
+            ObjectPreInjectors.Remove(type);
+        }
+    }
+
     private static void RegisterInjector(Type type)
     {
         if (!type.IsDefined(InjectAttributeType, false)) return;
