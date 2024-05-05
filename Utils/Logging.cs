@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using BepInEx.Logging;
 using Logger = BepInEx.Logging.Logger;
 
@@ -26,6 +27,30 @@ public static class Log
     public static void Exception(Exception exception)
     {
         GetLogger(Assembly.GetCallingAssembly()).LogError(exception?.Message ?? "Null");
+    }
+
+    [Conditional("DEBUG")]
+    public static void DebugPrint(object message)
+    {
+        Print(message);
+    }
+
+    [Conditional("DEBUG")]
+    public static void DebugWarning(object message)
+    {
+        Warning(message);
+    }
+
+    [Conditional("DEBUG")]
+    public static void DebugError(object message)
+    {
+        Error(message);
+    }
+
+    [Conditional("DEBUG")]
+    public static void DebugException(Exception exception)
+    {
+        Exception(exception);
     }
 
     private static ManualLogSource GetLogger(Assembly assembly)

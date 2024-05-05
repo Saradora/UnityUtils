@@ -2,6 +2,7 @@
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityMDK.Injection;
 using UnityMDK.Patches;
 
 namespace UnityMDK;

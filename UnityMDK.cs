@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityMDK.Injection;
 
@@ -7,7 +8,7 @@ namespace UnityMDK;
 public class UnityMDK : MonoBehaviour
 {
     public const string ModGuid = "Saradora.UnityMDK";
-    public const string ModVersion = "1.2.0";
+    public const string ModVersion = "1.3.0";
     public const string ModName = "Unity MDK";
     
     public static UnityMDK Instance { get; private set; }
@@ -20,22 +21,32 @@ public class UnityMDK : MonoBehaviour
             return;
         }
         
-        CreateSceneConstructor(gameObject.scene);
+        SceneInjection.Initialize();
+        
+        InjectScene(gameObject.scene);
         SceneManager.sceneLoaded += OnSceneLoaded;
         
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
-    private static void OnSceneLoaded(Scene scene, LoadSceneMode loadMode)
+    private void OnSceneLoaded(Scene scene, LoadSceneMode loadMode)
     {
-        CreateSceneConstructor(scene);
+        InjectScene(scene);
     }
 
-    private static void CreateSceneConstructor(Scene scene)
+    private void InjectScene(Scene scene)
     {
-        GameObject gameObject = new();
-        SceneManager.MoveGameObjectToScene(gameObject, scene);
-        gameObject.AddComponent<SceneConstructor>();
+        StartCoroutine(InjectionRoutine(scene));
+    }
+
+    private static IEnumerator InjectionRoutine(Scene scene)
+    {
+        SceneInjection.InjectScene(scene);
+        SceneInjection.ConstructScene(scene, EConstructorEvent.AfterAwake);
+        yield return null;
+        SceneInjection.ConstructScene(scene, EConstructorEvent.AfterStart);
+        yield return null;
+        SceneInjection.ConstructScene(scene, EConstructorEvent.AfterFirstUpdate);
     }
 }

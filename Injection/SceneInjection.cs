@@ -14,11 +14,14 @@ public static class SceneInjection
     private static readonly Dictionary<Type, List<IInjectable>> ObjectPostInjectors = new();
     private static readonly List<GameObject> ConstructedPrefabs = new();
     private static readonly List<int> ConstructedScenes = new();
+
+    internal static readonly Dictionary<string, List<IPrefabInjector>> PrefabsToPatch = new();
     
     private static bool _initialized;
         
     private static readonly Type ComponentType = typeof(Component);
     private static readonly Type InjectAttributeType = typeof(InjectToComponentAttribute);
+    private static readonly Type IPrefabInjectorType = typeof(IPrefabInjector);
 
     private static Scene _dontDestroyOnLoadScene;
 
@@ -46,6 +49,7 @@ public static class SceneInjection
                 {
                     try
                     {
+                        RegisterPrefabInjector(type);
                         RegisterInjector(type);
                         RegisterSceneConstructor(type);
                         RegisterInitializer(type);
@@ -70,7 +74,6 @@ public static class SceneInjection
         SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
-    // todo add component post injector
     public static void AddComponentInjector<TComponent>(ComponentInjector injector, bool postAwake = false) where TComponent : Component
     {
         Type type = typeof(TComponent);
@@ -107,6 +110,8 @@ public static class SceneInjection
             if (!ObjectPreInjectors.ContainsKey(type)) ObjectPreInjectors.Add(type, new List<IInjectable>());
             ObjectPreInjectors[type].Add(injectable);
         }
+
+        Log.Warning($"Constructable: Adding {injectable.GetType()} to {type}");
     }
 
     public static void RemoveComponentInjector<TComponent>(bool postAwake = false) where TComponent : Component
@@ -146,6 +151,35 @@ public static class SceneInjection
         }
 
         Log.Warning($"Constructable: Adding {type} to {injectAttribute.ComponentType}");
+    }
+
+    private static void RegisterPrefabInjector(Type type)
+    {
+        if (!IPrefabInjectorType.IsAssignableFrom(type))
+            return;
+
+        var attribute = type.GetCustomAttribute<InjectToPrefabAttribute>(true);
+        if (attribute is null)
+            return;
+
+        if (string.IsNullOrEmpty(attribute.PrefabName))
+            return;
+
+        if (!PrefabsToPatch.ContainsKey(attribute.PrefabName))
+        {
+            PrefabsToPatch.Add(attribute.PrefabName, new());
+        }
+
+        try
+        {
+            var instance = (IPrefabInjector)Activator.CreateInstance(type);
+            PrefabsToPatch[attribute.PrefabName].Add(instance);
+            Log.Warning($"Added Prefab '{attribute.PrefabName}' patch: {instance.GetType().Name}");
+        }
+        catch (Exception e)
+        {
+            Log.Exception(e);
+        }
     }
 
     private static void RegisterSceneConstructor(Type type)
@@ -258,45 +292,37 @@ public static class SceneInjection
         DoInjectGameObject(gameObject);
         ConstructedPrefabs.Add(gameObject);
     }
-    
-    private static List<Component> _constructedComponents = new();
 
     internal static void InjectGameObjectPost(GameObject gameObject)
     {
-        _constructedComponents.Clear();
         foreach ((Type type, List<IInjectable> injectables) in ObjectPostInjectors)
         {
             var components = gameObject.GetComponentsInChildren(type, true);
 
             foreach (var component in components)
             {
-                if (_constructedComponents.Contains(component)) continue;
                 foreach (var constructor in injectables)
                 {
                     if (!constructor.CanBeInjected(component)) continue;
                     constructor.Inject(component);
                 }
-                _constructedComponents.Add(component);
             }
         }
     }
 
     private static void DoInjectGameObject(GameObject gameObject)
     {
-        _constructedComponents.Clear();
         foreach ((Type type, List<IInjectable> injectables) in ObjectPreInjectors)
         {
             var components = gameObject.GetComponentsInChildren(type, true);
 
             foreach (var component in components)
             {
-                if (_constructedComponents.Contains(component)) continue;
                 foreach (var constructor in injectables)
                 {
                     if (!constructor.CanBeInjected(component)) continue;
                     constructor.Inject(component);
                 }
-                _constructedComponents.Add(component);
             }
         }
     }

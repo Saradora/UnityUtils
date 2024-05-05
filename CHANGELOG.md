@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2024-05-05
+
+### Added
+- Ability to patch prefabs
+
 ## [1.2.0] - 2024-03-31
 
 ### Added
